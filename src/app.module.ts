@@ -5,7 +5,10 @@ import { UserModule } from './module/user/user.module';
 import { AuthModule } from './module/auth/auth.module';
 
 @Module({
-  imports: [UserModule, AuthModule],
+  imports: [
+    UserModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
