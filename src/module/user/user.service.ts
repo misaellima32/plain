@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,20 +13,31 @@ export class UserService {
     private userRepository: Repository<User>
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const findByEmail = await this.findOneByEmail(createUserDto.email)    
+    if(findByEmail) {
+      return {
+        statusCode: HttpStatus.CONFLICT,
+        message: `Já existe um usário cadastrado com essse email: ${createUserDto.email}`
+      }
+    }
+    return this.userRepository.save(createUserDto);
   }
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOneById(id: number): Promise<User> {
+    return this.userRepository.findOne(id);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findOneByEmail(email: string): Promise<User> {
+    return this.userRepository.findOne({email});
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    return this.findOneById(id);
   }
 
   remove(id: number) {
